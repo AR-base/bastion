@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run test suite
+        run: node --test
+
+  secret-scan:
+    name: Guard against committed secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Fail if an Anthropic key is present in source
+        run: |
+          if grep -rEn "sk-ant-[A-Za-z0-9_-]{20,}" --include='*.js' --include='*.json' --include='*.toml' --include='*.html' .; then
+            echo "::error::A hardcoded API key was found in source. Use 'wrangler secret put' instead."
+            exit 1
+          fi
+          echo "No hardcoded secrets found."

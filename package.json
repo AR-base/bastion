@@ -1,9 +1,29 @@
 {
   "name": "bastion",
   "version": "1.0.0",
-  "description": "Passive website security scanner for small businesses, built on Cloudflare Workers.",
+  "description": "Passive website security scanner for small businesses and startups, built on Cloudflare Workers with an AI risk briefing.",
   "type": "module",
-  "private": true,
+  "license": "MIT",
+  "author": "Pinninti Sai Anish",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AR-base/bastion.git"
+  },
+  "homepage": "https://github.com/AR-base/bastion#readme",
+  "bugs": {
+    "url": "https://github.com/AR-base/bastion/issues"
+  },
+  "keywords": [
+    "security",
+    "scanner",
+    "security-headers",
+    "ssrf",
+    "cloudflare-workers",
+    "small-business"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "test": "node --test",
     "dev": "wrangler dev",
