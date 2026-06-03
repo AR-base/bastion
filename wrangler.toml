@@ -1,0 +1,22 @@
+name = "bastion"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+
+# Serve the frontend in /public as static assets. Requests that don't match a
+# file fall through to the Worker (which handles /api/scan).
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# ANTHROPIC_API_KEY is NOT stored here. It is set as an encrypted secret:
+#   wrangler secret put ANTHROPIC_API_KEY
+# The scanner runs fully without it (technical findings only); the key just
+# enables the plain-English AI briefing.
+
+# Which model writes the AI briefing. Switch by editing this one line (then
+# redeploy), or override in the Cloudflare dashboard without a redeploy.
+#   claude-haiku-4-5-20251001  — cheapest + fastest; ideal for this task (~$0.002/scan)
+#   claude-sonnet-4-6          — middle ground (~3x Haiku cost)
+#   claude-opus-4-8            — flagship; richest prose (~5x Haiku cost, ~$0.01/scan)
+[vars]
+AI_MODEL = "claude-opus-4-8"
