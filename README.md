@@ -1,8 +1,15 @@
 # Bastion
 
+[![CI](https://github.com/AR-base/bastion/actions/workflows/ci.yml/badge.svg)](https://github.com/AR-base/bastion/actions/workflows/ci.yml)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![Cloudflare Workers](https://img.shields.io/badge/runtime-Cloudflare%20Workers-f38020.svg)
+![Claude](https://img.shields.io/badge/model-Claude%20Haiku%204.5-orange.svg)
+
 A fast, **passive** website security scanner for small businesses and startups, built on Cloudflare Workers. It checks the security signals an attacker looks at first — transport security, response headers, cookie flags, CORS, and information disclosure — scores them A–F, and uses Claude Haiku to explain the risks in plain language for a non-technical owner.
 
 It does **not** attack, probe, fuzz, or log into the target. It only inspects what the server already returns to any visitor. Only scan sites you own or are authorized to test.
+
+**Security policy:** [SECURITY.md](SECURITY.md) · **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Architecture
 
