@@ -8,6 +8,16 @@ compatibility_date = "2025-01-01"
 directory = "./public"
 binding = "ASSETS"
 
+# Per-IP rate limit on /api/scan. Each scan triggers a third-party fetch and
+# (optionally) a Claude call, so anonymous bursts can rack up cost fast.
+# 10 requests / 60 seconds is enough for any honest interactive use.
+# https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
+[[unsafe.bindings]]
+name = "SCAN_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
 # ANTHROPIC_API_KEY is NOT stored here. It is set as an encrypted secret:
 #   wrangler secret put ANTHROPIC_API_KEY
 # The scanner runs fully without it (technical findings only); the key just
@@ -19,4 +29,4 @@ binding = "ASSETS"
 #   claude-sonnet-4-6          — middle ground (~3x Haiku cost)
 #   claude-opus-4-8            — flagship; richest prose (~5x Haiku cost, ~$0.01/scan)
 [vars]
-AI_MODEL = "claude-opus-4-8"
+AI_MODEL = "claude-haiku-4-5-20251001"
