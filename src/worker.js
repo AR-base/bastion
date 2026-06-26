@@ -86,6 +86,22 @@ async function safeFetch(startUrl, fetchImpl, method = 'GET') {
 }
 
 async function handleScan(request, env) {
+  // /api/scan makes outbound network requests and (optionally) calls the
+  // Anthropic API, so unauthenticated bursts are expensive. The
+  // SCAN_RATE_LIMITER binding (see wrangler.toml) is keyed on caller IP; if
+  // the binding is absent (e.g. local dev) we proceed without limiting.
+  if (env && env.SCAN_RATE_LIMITER) {
+    const ip = request.headers.get('cf-connecting-ip') ||
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      'unknown';
+    const { success } = await env.SCAN_RATE_LIMITER.limit({ key: ip });
+    if (!success) {
+      return json({ error: 'Too many scans from this IP. Try again in a minute.' }, 429, {
+        'retry-after': '60',
+      });
+    }
+  }
+
   let payload;
   try {
     payload = await request.json();
