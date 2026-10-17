@@ -9,7 +9,7 @@ A fast, **passive** website security scanner for small businesses and startups, 
 
 It does **not** attack, probe, fuzz, or log into the target. It only inspects what the server already returns to any visitor. Only scan sites you own or are authorized to test.
 
-**Security policy:** [SECURITY.md](SECURITY.md) · **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
+**Live:** https://bastion.anish-pinninti.workers.dev · **Security policy:** [SECURITY.md](SECURITY.md) · **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Architecture
 
