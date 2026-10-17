@@ -21,8 +21,9 @@ bastion/
 │   │                    blocking (v4/v6), DNS-over-HTTPS resolution + re-check
 │   ├── analyzers.js     Pure passive checks → findings
 │   ├── scoring.js       Findings → 0–100 score + A–F grade
-│   └── ai-summary.js    Builds the Claude Haiku request → plain-English briefing
-├── public/index.html    Frontend (served via the static-assets binding)
+│   ├── ai-summary.js    Builds the Claude Haiku request → plain-English briefing
+│   └── security-headers.js  Headers + HTTPS redirect for Bastion's own responses
+├── public/            Frontend: index.html, app.js, styles.css (no inline code)
 ├── test/                Unit tests (node --test), incl. SSRF bypass attempts
 ├── wrangler.toml        Worker + assets config (no secrets stored here)
 └── package.json
@@ -35,6 +36,7 @@ The analysis, scoring, SSRF IP logic, and AI request builder are all pure functi
 - **SSRF is the headline risk.** A server that fetches user-supplied URLs can be tricked into hitting internal services or the cloud metadata endpoint (`169.254.169.254`). Defenses: scheme allowlist; rejection of URL credentials; canonicalization of decimal/octal/hex IP literals so `http://2130706433` (= 127.0.0.1) can't sneak through; blocking of all private/loopback/link-local/reserved ranges for IPv4, IPv6, and IPv4-mapped IPv6; DNS-over-HTTPS resolution with a re-check of every returned IP; and re-validation of **every redirect hop** so an allowed origin can't 302 us inward. DNS resolution **fails closed**.
 - **No secrets in source.** The Anthropic API key is a Wrangler secret read from `env`, never committed.
 - **Graceful degradation.** With no key set, the scanner returns full technical findings; the key only adds the AI briefing.
+- **Bastion passes its own scan (A, 100/100).** The Worker runs before the static assets and sets the same headers it checks on other sites, on every response: a strict CSP with no `'unsafe-inline'` or `'unsafe-eval'` (all script and style live in `public/app.js` and `public/styles.css`), HSTS with preload, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP/CORP; plain HTTP is answered with a 301 to HTTPS; version-revealing headers are stripped. `test/self-scan.test.js` grades Bastion's own responses with Bastion's analyzers and fails the build if the score drops below 100.
 - **Output encoding.** The frontend HTML-escapes all scan data before rendering, so a hostile `Server` header can't inject script into the report.
 - **Known limitation:** TOCTOU DNS rebinding (a record that changes between the resolve check and the fetch) is not fully eliminated. For higher assurance, add a Cloudflare WAF rate-limit rule and consider pinning the resolved IP. Documented honestly rather than hidden.
 
