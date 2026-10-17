@@ -14,6 +14,7 @@ import {
 import { runAllChecks } from '../lib/analyzers.js';
 import { computeScore } from '../lib/scoring.js';
 import { generateBriefing } from '../lib/ai-summary.js';
+import { httpsRedirect, withSecurityHeaders } from '../lib/security-headers.js';
 
 const FETCH_TIMEOUT_MS = 8000;
 const MAX_REDIRECTS = 5;
@@ -190,19 +191,31 @@ async function handleScan(request, env) {
   return json(scanResult);
 }
 
+async function route(request, env) {
+  const url = new URL(request.url);
+
+  if (url.pathname === '/api/scan') {
+    if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { allow: 'POST' });
+    return handleScan(request, env);
+  }
+
+  // Everything else is served by the static assets binding.
+  if (env && env.ASSETS) return env.ASSETS.fetch(request);
+  return new Response('Not found', { status: 404 });
+}
+
 export default {
+  // Runs before static assets (run_worker_first), so every response — page,
+  // assets, API, errors — gets HTTPS enforcement and the security headers.
   async fetch(request, env) {
-    const url = new URL(request.url);
-
-    if (url.pathname === '/api/scan') {
-      if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
-      return handleScan(request, env);
+    const redirect = httpsRedirect(request);
+    if (redirect) return redirect;
+    try {
+      return withSecurityHeaders(await route(request, env));
+    } catch {
+      return withSecurityHeaders(json({ error: 'Internal error.' }, 500));
     }
-
-    // Everything else is served by the static assets binding.
-    if (env && env.ASSETS) return env.ASSETS.fetch(request);
-    return new Response('Not found', { status: 404 });
   },
 };
 
-export { handleScan, safeFetch };
+export { handleScan, safeFetch, route };

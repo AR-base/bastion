@@ -2,11 +2,13 @@ name = "bastion"
 main = "src/worker.js"
 compatibility_date = "2025-01-01"
 
-# Serve the frontend in /public as static assets. Requests that don't match a
-# file fall through to the Worker (which handles /api/scan).
+# Serve the frontend in /public as static assets through the ASSETS binding.
 [assets]
 directory = "./public"
 binding = "ASSETS"
+# Run the Worker before static assets so it can force HTTPS and attach the
+# security headers to every response (see lib/security-headers.js).
+run_worker_first = true
 
 # Per-IP rate limit on /api/scan. Each scan triggers a third-party fetch and
 # (optionally) a Claude call, so anonymous bursts can rack up cost fast.
